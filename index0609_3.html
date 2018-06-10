@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>index_0609_3</title>
+</head>
+<body>
+  <script src="../build/three.min.js"></script>
+  <script src="js/controls/OrbitControls.js"></script>
+  <script src="js/libs/stats.min.js"></script>
+  <script src="js/loaders/FBXLoader.js"></script>
+  <script src="js/libs/inflate.min.js"></script>
+  <script>
+      var renderer,camera,scene;
+      var controls;
+      var fbxLoader,texLoader;
+      var stats;
+
+      var groundPanel;
+      function init() {
+          renderer=new THREE.WebGLRenderer();
+          renderer.setSize(window.innerWidth,window.innerHeight);
+          document.body.appendChild(renderer.domElement);
+
+          camera=new THREE.PerspectiveCamera(60,window.innerWidth/window.innerHeight,1,10000);
+          camera.position.set(0,100,0);
+          //controls=new THREE.OrbitControls(camera);
+          //controls.update();
+
+          scene=new THREE.Scene();
+          var gh=new THREE.GridHelper(200,20);
+          //scene.add(gh);
+
+          stats=new Stats();
+          document.body.appendChild(stats.dom)
+
+          initSky();
+
+          initModel();
+
+          initLigt();
+
+          window.addEventListener("keydown",onKeyDown,false)
+          window.addEventListener("resize",onWindowResize,false)
+      }
+
+
+      function initLigt() {
+          var light=new THREE.DirectionalLight(0xffffff);
+          light.position.set(0,2,0);
+          scene.add(light);
+
+          var ambient=new THREE.AmbientLight(0xffffff);
+          scene.add(ambient)
+      }
+
+      function animate() {
+          requestAnimationFrame(animate)
+          stats.update();
+          renderer.render(scene,camera);
+      }
+
+      function initSky(){
+
+          var path="Textures/cube/skybox/";
+          var format=".jpg";
+          var urls=[
+              path+"px"+format,path+"nx"+format,
+              path+"py"+format,path+"ny"+format,
+              path+"pz"+format,path+"nz"+format,
+          ];
+
+          var reflectionCube=new THREE.CubeTextureLoader().load(urls);
+          reflectionCube.format=THREE.RGBFormat;
+          scene.background=reflectionCube;
+      }
+
+
+      function initModel() {
+         var p=new Promise(function (resolve,reject) {
+              fbxLoader=new THREE.FBXLoader();
+              texLoader=new THREE.TextureLoader();
+             texLoader.load("my/grass_1_fixed_d.png",function (tex) {
+             });
+             texLoader.load("my/grass_1_fixed_n.png");
+             texLoader.load("my/timber_1_fixed_d.png");
+             console.log("1111111")
+
+             texLoader.load("my/wood_1_d.png");  //timber_2_fixed_d.png
+             texLoader.load("my/wood_3_d.png");  //timber_2_fixed_d.png
+             texLoader.load("my/timber_2_fixed_d.png");
+             texLoader.load("my/wooden-boards-texture_d.png");
+             resolve(1);
+         });
+         p.then(function (val) {
+             fbxLoader.load("my/plane.fbx",function (obj)
+             {
+                 console.log("222222222")
+                 obj.name="plane";
+                 console.log(obj)
+                 obj.position.set(0,-100,0);
+                 scene.add(obj);
+             });
+         }).then(function () {
+             fbxLoader.load("my/house.003.fbx",function (obj)
+             {
+                 console.log("222222222")
+                 obj.position.set(0,-50,0);
+                 scene.add(obj);
+             });
+         });
+      }
+
+      function  onKeyDown(event) {
+          //console.log(event.keyCode)
+          if(event.keyCode==32){
+              camera.rotation.y+=Math.PI/180;
+          }
+          else if(event.keyCode==38){
+              camera.position.z+=10;
+              
+          }
+          else if(event.keyCode==40){
+              camera.position.z-=10;
+          }
+      }
+
+      function onWindowResize() {
+          console.log("resize");
+          renderer.setSize(window.innerWidth,window.innerHeight)
+          camera.aspect=window.innerWidth/window.innerHeight;
+      }
+
+      init();
+      animate();
+  </script>
+</body>
+</html>
